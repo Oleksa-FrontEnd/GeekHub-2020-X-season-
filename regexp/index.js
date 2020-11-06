@@ -5,8 +5,8 @@ document.querySelector('#user-form').addEventListener('submit', function (e) {
     let email = document.querySelector('[name = "email"]')
     let password = document.querySelector('[name = "password"]')
     
-    let validFullName  = /^([а-яїієґ][^ыэъё]*)\s+[а-яїієґ][^ыэъё]\s+[а-яїієґ][^ыэъё]$/gi;
-    let validEmail = /\w*@{1}\w*(\.){1}\w*/gi
+    let validFullName  = /^[йцукенгґшщзхїфівапролджєячсмитьбю]+\s[йцукенгґшщзхїфівапролджєячсмитьбю]+\s[йцукенгґшщзхїфівапролджєячсмитьбю]+$/gi;
+    let validEmail = /^[^\.][a-zA-Z0-9-\.]+[^\.]@([a-zA-Z0-9-]+\.)+[a-zA-Z0-9-]+$/gi
     let validPassword = /(?=[A-Z\d]*?[a-z])(?=[a-z\d]*?[A-Z])(?=[a-zA-Z]*?\d)[a-zA-Z\d]{8}/
     //let validPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}/
     
