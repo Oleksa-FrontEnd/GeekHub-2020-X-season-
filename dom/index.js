@@ -1,135 +1,98 @@
-jQuery('input').on('paste', function(e) {
-    e.preventDefault();
 
-    const alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
+jQuery('input').on('paste', function (e) {
+	e.preventDefault();
 
-    var text = e.originalEvent.clipboardData.getData('text/plain');
-    var input = e.currentTarget;
+	var text = e.originalEvent.clipboardData.getData('text/plain').split('\n');;
+	var input = e.currentTarget;
 
-    let name = $(input).attr('name');
-    let selected = alphabet.filter(function(letter) {
-        return name.search(letter.toLocaleLowerCase()) === 0;
-    })[0];
-    let generation = /(\d+)/.exec(name)[0];
-    generation = +generation;
+	input.value = `${text}`;
+	let targetName = e.target.name; // e.target ссылается на кликнутый элемент
 
-    var textArray = text.split(/\n/);
+	console.log(`This targetName: ${targetName}`); //console
 
-    let rowCount = textArray.length;
+	let data = text.map(textContent => textContent.split(';'));
 
-    let colCount = 0;
-    let letterIndex = alphabet.indexOf(selected);
+	let table = document.querySelector('table');
+	let thead = document.createElement('thead');
+	let tbody = document.createElement('tbody');
+	let tr = document.createElement('tr');
+	let searchTr = document.querySelectorAll('tr');	//search tage tr
+	let indexTr = searchTr[+targetName[1]]; //второй элемент name
 
-    let tableBody = [];
-    let emptyArray = [];
+	const alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
+	
+	//tr
+	let thNumber = data[0].lenght + 1 //ABC...
 
-    for (let i = 0; i < rowCount; i++) {
-        var splitArray = textArray[i].split(';');
-        colCount = Math.max(colCount, splitArray.length);
-    }
-    for (let j = 0; j < colCount; j++) {
-        emptyArray[j] = '';
-    }
+	$('thead').remove(); //delete child element table
+	$('tbody').remove();
 
-    for (let i = 0; i < rowCount; i++) {
-        var splitArray = textArray[i].split(';');
-        splitArray = splitArray.concat(emptyArray.slice(splitArray.length));
-        let newGeneration = generation + i;
-        let newLetterIndex = letterIndex;
-        let html = splitArray.map((word) => {
-            let myLetter = alphabet[newLetterIndex].toLocaleLowerCase();
-            newLetterIndex++;
-            return `<td><input type="text" name="${myLetter}${newGeneration}" value="${word.replace(/"/g, "&quot;")}"/></td>`;
-        });
+	for (let i = 0; i < thNumber; i++) {		//tr for thead
+		let th = document.createElement('th');
 
-        let emptyFields = alphabet.slice(0, letterIndex).map((l) => {
-            let myLetter = l.toLocaleLowerCase();
-            return `<td><input type="text" name="${myLetter}${newGeneration}" value=""/></td>`;
-        });
+		(i > 0) ? th.innerHTML = `${alphabet[i-1]}` : th.innerHTML = `&nbsp;`;
 
-        html = emptyFields.concat(html);
-        colCount = html.length;
-        html = `
-				<tr>
-					<th>${newGeneration}</th>
-					${html.join('\n')}
-				</tr>
-				`;
-        tableBody.push(html);
-    }
+		tr.appendChild(th) //position th in thead
+	}
 
-    for (let g = generation - 1; g > 0; g--) {
-        let html = [];
-        for (let i = 0; i < colCount; i++) {
-            let letter = alphabet[i].toLocaleLowerCase();
-            html.push(`<td><input type="text" name="${letter}2" value=""/></td>`);
-        }
-        html = html.join('\n');
-        html = `
-				<tr>
-					<th>${g}</th>
-					${html}
-				</tr>
-				`;
-        tableBody = [html].concat(tableBody);
-    }
+	for (let i = 0; i < data.lenght; i++){		//th for body
+		let tr = document.createElement('tr'); 
+		let th = document.createElement('th'); 
 
-    let usedLetters = alphabet.slice(0, colCount);
-    let tableTheadRows = ['&nbsp;'].concat(usedLetters).map((l) => {
-        return `<th>${l}</th>`;
-    }).join('\n');
-    tableTheadRows = `
-		<tr>
-			${tableTheadRows}
-		</tr>
-		`;
+		th.innerHTML = `${i + 1}`		//th for tbody context number 1 2...
+		tr.appendChild('th')		//position th in tbody
 
-    $('thead').html(tableTheadRows);
-    $('tbody').html(tableBody.join(' '))
+		for (let j = 0; j < thNumber - 1; j++) {
+			let td = document.createElement('td') //td in tr for tbody
+			if (!targetName) {
+				td.innerHTML = `<input type="text" name="${alphabet[j].toLocaleLowerCase()}" value="">`
+			} else {
+				td.innerHTML = `<input type="text" name="${alphabet[j].toLocaleLowerCase()}${targetName[i+1]}" value="${data[i][j]}">`
+			}
+			tr.appendChild(td);		//position td in tbody
+		}
+			tbody.appendChild(tr)	//position tr for tbody
+	}
+	table.appendChild(thead);
+	table.appendChild(tbody);
+	thead.appendChild(tr);
 });
-
 
 var currentColumn;
 
-jQuery('thead th').on('contextmenu', function(e) {
-    e.preventDefault();
+jQuery('thead th').on('contextmenu', function (e) {
+	e.preventDefault();
 
-    currentColumn = e.currentTarget;
+	currentColumn = e.currentTarget;
 
-    var menu = jQuery('#column-menu');
+	var menu = jQuery('#column-menu');
 
-    var th = $('thead th');
+	menu.addClass('d-block');
 
-    if (currentColumn === th[0]) {
-        menu.removeClass('d-block');
-    } else {
-        menu.addClass('d-block');
-    }
-
-    menu.css({
-        left: e.clientX,
-        top: e.clientY
-    });
+	menu.css({
+		left: e.clientX,
+		top: e.clientY
+	});
 });
 
-jQuery('#column-menu [data-action]').on('click', function(e) {
-    e.preventDefault();
+jQuery('#column-menu [data-action]').on('click', function (e) {
+	e.preventDefault();
 
-    var action = e.currentTarget.getAttribute('data-action');
+	var action = e.currentTarget.getAttribute('data-action');
 
-    switch (action) {
-        case 'add-left':
+	switch (action) {
+		case 'add-left':
 
-            break;
+			break;
 
-        case 'add-right':
+		case 'add-right':
 
-            break;
+			break;
 
-        case 'remove':
+		case 'remove':
 
-            break;
-    }
+			break;
+	}
 
-    jQuery('#column-menu').removeClass('d-block');
+	jQuery('#column-menu').removeClass('d-block');
 });
